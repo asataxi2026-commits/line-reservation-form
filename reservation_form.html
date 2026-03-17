@@ -480,6 +480,37 @@
       max-height: 200px;
       overflow-y: auto;
       line-height: 1.6;
+      display: none; /* Initially hidden */
+    }
+
+    .privacy-toggle-wrapper {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .privacy-toggle-link {
+      color: var(--secondary);
+      text-decoration: underline;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .privacy-toggle-link:hover {
+      color: var(--primary);
+    }
+
+    .privacy-toggle-link::after {
+      content: '▼';
+      font-size: 0.7rem;
+      transition: transform 0.3s;
+    }
+
+    .privacy-toggle-link.open::after {
+      transform: rotate(180deg);
     }
 
     .privacy-box h3 {
@@ -697,8 +728,11 @@
         <!-- Filled via JS -->
       </div>
 
-      <div class="privacy-box">
-        <h3>個人情報の取り扱いについて</h3>
+      <div class="privacy-toggle-wrapper" style="margin-bottom: 15px; text-align: left;">
+        <a id="privacy-toggle" class="privacy-toggle-link" onclick="togglePrivacyText()" style="color: var(--secondary); text-decoration: underline; font-size: 0.9rem; font-weight: bold; cursor: pointer;">個人情報の取り扱いについてを確認する</a>
+      </div>
+
+      <div id="privacy-box" class="privacy-box">
         <p>あさタクシー（以下「当事業所」）は、介護タクシーの予約・送迎サービスの提供にあたり、お客様の個人情報を以下のとおり取り扱います。</p>
         <table>
           <tr><th>事業所名</th><td>あさタクシー</td></tr>
@@ -723,7 +757,7 @@
         <p style="text-align: right; margin-top: 10px;">制定日：2026年3月16日</p>
       </div>
 
-      <div class="consent-wrapper">
+      <div class="consent-wrapper" style="background: #fff; border: 2px solid var(--gray); border-radius: 12px; padding: 15px; margin-bottom: 25px; transition: border-color 0.3s;">
         <label class="checkbox-label" style="border: none; background: transparent; box-shadow: none; padding: 0; width: 100%; display: flex; align-items: flex-start;">
           <input type="checkbox" id="privacy-consent" onchange="toggleSubmitButton()">
           <span style="font-weight: bold; font-size: 0.95rem; color: var(--text-main); margin-top: 2px;">上記の個人情報の取り扱いに同意して予約に進みます</span>
@@ -1042,6 +1076,21 @@
       const isChecked = document.getElementById('privacy-consent').checked;
       const btn = document.getElementById('final-submit-btn');
       btn.disabled = !isChecked;
+    }
+
+    // 個人情報の詳細を表示・非表示
+    function togglePrivacyText() {
+      const box = document.getElementById('privacy-box');
+      const toggle = document.getElementById('privacy-toggle');
+      if (box.style.display === 'block') {
+        box.style.display = 'none';
+        toggle.classList.remove('open');
+        toggle.textContent = '個人情報の取り扱いについてを確認する';
+      } else {
+        box.style.display = 'block';
+        toggle.classList.add('open');
+        toggle.textContent = '個人情報の取り扱いについてを閉じる';
+      }
     }
 
     function hideConfirmation() {
