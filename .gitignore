@@ -1,0 +1,19 @@
+# Google Apps Script / Web artifacts
+.clasp.json
+appsscript.json
+
+# System / IDE
+.DS_Store
+Thumbs.db
+.gemini/
+.agents/
+.agent/
+_agents/
+_agent/
+brain/
+/tmp/
+
+# Logs
+*.log
+node_modules/
+package-lock.json
