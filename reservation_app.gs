@@ -193,6 +193,7 @@ function submitReservation(data) {
     const eventTitle = customerName + ' 様【予約】';
     
     const description = `Googleフォーム（新アプリ）からの予約\n\n` +
+                        `ご予約日時：${year}年${Number(month)}月${Number(day)}日 ${data.time}\n` +
                         `お名前：${data.name}\n` +
                         `お迎え先：${data.pickup}\n` +
                         `目的地：${data.dropoff}\n` +
@@ -376,7 +377,7 @@ function sendDayBeforeReminders() {
     const title = event.getTitle();
     
     // イベントの説明から LINE_USER_ID を正規表現で探す
-    const match = description.match(/\[LINE_USER_ID:\s*(U[0-9a-fA-F]{31})\]/);
+    const match = description.match(/\[LINE_USER_ID:\s*(U[0-9a-fA-F]{32})\]/);
     if (match && match[1]) {
       const userId = match[1];
       const startTimeStr = Utilities.formatDate(event.getStartTime(), Session.getScriptTimeZone(), 'HH:mm');
@@ -434,12 +435,12 @@ function setupReminderTrigger() {
     }
   }
   
-  // 毎日朝8時〜9時の間に「sendDayBeforeReminders」を実行
+  // 毎日お昼の12時〜13時の間に「sendDayBeforeReminders」を実行
   ScriptApp.newTrigger('sendDayBeforeReminders')
     .timeBased()
     .everyDays(1)
-    .atHour(8)
+    .atHour(12)
     .create();
     
-  Logger.log('【設定完了】毎朝8時台のリマインダー自動送信トリガーを作成しました。');
+  Logger.log('【設定完了】お昼12時台のリマインダー自動送信トリガーを作成しました。');
 }

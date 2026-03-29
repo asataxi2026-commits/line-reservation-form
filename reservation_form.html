@@ -830,13 +830,55 @@
         <p style="text-align: right; margin-top: 10px;">制定日：2026年3月16日</p>
       </div>
 
+      <div class="privacy-toggle-wrapper" style="margin-bottom: 15px; text-align: left;">
+        <a id="tokushoho-toggle" class="privacy-toggle-link" onclick="toggleTokushoho()"
+          style="color: var(--secondary); text-decoration: underline; font-size: 0.9rem; font-weight: bold; cursor: pointer;">特定商取引法に基づく表記を確認する</a>
+      </div>
+
+      <div id="tokushoho-box" class="privacy-box">
+        <p>あさタクシー（以下「当事業所」）の特定商取引法に基づく表記は以下のとおりです。</p>
+        <table>
+          <tr>
+            <th>事業所名</th>
+            <td>あさタクシー</td>
+          </tr>
+          <tr>
+            <th>所在地</th>
+            <td>広島県広島市安佐南区安東5丁目7-10</td>
+          </tr>
+          <tr>
+            <th>代表者</th>
+            <td>平田隼己（ひらた としき）</td>
+          </tr>
+          <tr>
+            <th>電話番号</th>
+            <td>070-9017-6085</td>
+          </tr>
+        </table>
+        <p><strong>■ サービスの対価（運賃・料金）</strong><br>当サイトでの概算見積もり、および当日のメーター運賃等に準拠します。（詳細は事前・または当日にご案内いたします）</p>
+        <p><strong>■ 対価の支払時期・支払方法</strong><br>サービス提供完了（降車）時に、現金、各種QR決済、およびクレジットカード等にてお支払いください。</p>
+        <p><strong>■ サービス提供時期</strong><br>ご予約いただいた日時に配車し、送迎サービスを提供いたします。</p>
+      </div>
+
+      <div class="privacy-toggle-wrapper" style="margin-bottom: 15px; text-align: left;">
+        <a id="cancel-toggle" class="privacy-toggle-link" onclick="toggleCancelPolicy()"
+          style="color: var(--secondary); text-decoration: underline; font-size: 0.9rem; font-weight: bold; cursor: pointer;">キャンセルポリシーを確認する</a>
+      </div>
+
+      <div id="cancel-box" class="privacy-box">
+        <p><strong>■ ご予約のキャンセルについて</strong><br>
+        お加減の変化や急なご事情による当日キャンセルの場合でも、<strong>キャンセル料金は原則として頂戴しておりません</strong>。キャンセルの場合は、お早めにお電話にてご連絡をお願いいたします。</p>
+        <p><strong>■ 悪質な無断キャンセル等への対応</strong><br>
+        他のお客様のご予約をお断りして車両を確保している関係上、<strong>意図的なシステムへの予約入力による妨害・嫌がらせ、またはサービスの「可用性」を著しく損なう悪質な無断キャンセル（虚偽の予約等）と認められた場合</strong>については例外とし、実費相当額の請求に加え、偽計業務妨害としての被害届提出、損害賠償請求等の厳格な法的措置（訴訟・罰金請求等を含む）をとらせていただきます。</p>
+      </div>
+
       <div class="consent-wrapper"
         style="background: #fff; border: 2px solid var(--gray); border-radius: 12px; padding: 15px; margin-bottom: 25px; transition: border-color 0.3s;">
         <label class="checkbox-label"
           style="border: none; background: transparent; box-shadow: none; padding: 0; width: 100%; display: flex; align-items: flex-start;">
           <input type="checkbox" id="privacy-consent" onchange="toggleSubmitButton()">
           <span
-            style="font-weight: bold; font-size: 0.95rem; color: var(--text-main); margin-top: 2px;">上記の個人情報の取り扱いに同意して予約に進みます</span>
+            style="font-weight: bold; font-size: 0.95rem; color: var(--text-main); margin-top: 2px;">上記の内容（個人情報の取り扱い・各種ポリシー等）に同意して予約に進みます</span>
         </label>
       </div>
 
@@ -1219,6 +1261,34 @@
         box.style.display = 'block';
         toggle.classList.add('open');
         toggle.textContent = '個人情報の取り扱いについてを閉じる';
+      }
+    }
+
+    function toggleTokushoho() {
+      const box = document.getElementById('tokushoho-box');
+      const toggle = document.getElementById('tokushoho-toggle');
+      if (box.style.display === 'block') {
+        box.style.display = 'none';
+        toggle.classList.remove('open');
+        toggle.textContent = '特定商取引法に基づく表記を確認する';
+      } else {
+        box.style.display = 'block';
+        toggle.classList.add('open');
+        toggle.textContent = '特定商取引法に基づく表記を閉じる';
+      }
+    }
+
+    function toggleCancelPolicy() {
+      const box = document.getElementById('cancel-box');
+      const toggle = document.getElementById('cancel-toggle');
+      if (box.style.display === 'block') {
+        box.style.display = 'none';
+        toggle.classList.remove('open');
+        toggle.textContent = 'キャンセルポリシーを確認する';
+      } else {
+        box.style.display = 'block';
+        toggle.classList.add('open');
+        toggle.textContent = 'キャンセルポリシーを閉じる';
       }
     }
 
