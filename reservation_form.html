@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>あさタクシー 予約カレンダー</title>
+  <!-- LIFF SDK -->
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     :root {
-      --primary: #f97316; /* Orange */
+      --primary: #f97316;
+      /* Orange */
       --primary-light: #fdba74;
-      --secondary: #c2410c; /* Dark Orange */
-      --bg-color: #fff7ed; /* Orange 50 */
+      --secondary: #c2410c;
+      /* Dark Orange */
+      --bg-color: #fff7ed;
+      /* Orange 50 */
       --white: #ffffff;
       --gray: #e2e8f0;
       --text-main: #334155;
@@ -20,14 +26,14 @@
       --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
     }
-    
+
     body {
       background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
       color: var(--text-main);
@@ -37,7 +43,7 @@
       align-items: center;
       padding: 20px;
     }
-    
+
     .container {
       width: 100%;
       max-width: 500px;
@@ -49,28 +55,35 @@
       margin-top: 10px;
       animation: fadeIn 0.6s ease-out;
     }
-    
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    
+
     header {
       text-align: center;
       margin-bottom: 30px;
     }
-    
+
     h1 {
       font-size: 1.5rem;
       color: var(--secondary);
       margin-bottom: 8px;
     }
-    
+
     p.subtitle {
       font-size: 0.9rem;
       color: var(--text-muted);
     }
-    
+
     .step-title {
       font-size: 1.1rem;
       font-weight: bold;
@@ -80,7 +93,7 @@
       align-items: center;
       gap: 8px;
     }
-    
+
     .step-title::before {
       content: "";
       display: inline-block;
@@ -89,7 +102,7 @@
       background-color: var(--primary);
       border-radius: 4px;
     }
-    
+
     /* Loader */
     .loader {
       display: flex;
@@ -98,7 +111,7 @@
       justify-content: center;
       padding: 40px 0;
     }
-    
+
     .spinner {
       width: 40px;
       height: 40px;
@@ -108,11 +121,13 @@
       animation: spin 1s linear infinite;
       margin-bottom: 15px;
     }
-    
+
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
-    
+
     /* Date Scroller */
     .dates-container {
       display: flex;
@@ -122,19 +137,21 @@
       margin-bottom: 20px;
       -webkit-overflow-scrolling: touch;
     }
-    
+
     .dates-container::-webkit-scrollbar {
       height: 6px;
     }
+
     .dates-container::-webkit-scrollbar-track {
       background: #f1f5f9;
       border-radius: 4px;
     }
+
     .dates-container::-webkit-scrollbar-thumb {
       background: var(--primary-light);
       border-radius: 4px;
     }
-    
+
     .date-btn {
       flex: 0 0 auto;
       width: 70px;
@@ -150,23 +167,34 @@
       transition: all 0.3s ease;
       box-shadow: var(--shadow-sm);
     }
-    
+
     .date-btn:hover {
       border-color: var(--primary-light);
       transform: translateY(-2px);
     }
-    
+
     .date-btn.active {
       background: var(--primary);
       border-color: var(--primary);
       color: var(--white);
       box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
     }
-    
-    .date-btn .month { font-size: 0.75rem; opacity: 0.8; }
-    .date-btn .day { font-size: 1.4rem; font-weight: bold; margin: 2px 0; }
-    .date-btn .weekday { font-size: 0.75rem; }
-    
+
+    .date-btn .month {
+      font-size: 0.75rem;
+      opacity: 0.8;
+    }
+
+    .date-btn .day {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin: 2px 0;
+    }
+
+    .date-btn .weekday {
+      font-size: 0.75rem;
+    }
+
     /* Time Slots */
     .slots-grid {
       display: grid;
@@ -175,21 +203,24 @@
       margin-bottom: 30px;
       max-height: 250px;
       overflow-y: auto;
-      padding-right: 8px; /* スクロールバー用の余白 */
+      padding-right: 8px;
+      /* スクロールバー用の余白 */
     }
-    
+
     .slots-grid::-webkit-scrollbar {
       width: 6px;
     }
+
     .slots-grid::-webkit-scrollbar-track {
       background: #f1f5f9;
       border-radius: 4px;
     }
+
     .slots-grid::-webkit-scrollbar-thumb {
       background: var(--primary-light);
       border-radius: 4px;
     }
-    
+
     .slot-btn {
       padding: 12px 5px;
       background: var(--white);
@@ -202,18 +233,18 @@
       transition: all 0.2s;
       box-shadow: var(--shadow-sm);
     }
-    
+
     .slot-btn:hover:not(:disabled) {
       border-color: var(--primary);
       color: var(--primary);
     }
-    
+
     .slot-btn.active {
       background: var(--primary);
       color: var(--white);
       border-color: var(--primary);
     }
-    
+
     .slot-btn:disabled {
       background: #f8fafc;
       color: #cbd5e1;
@@ -221,14 +252,14 @@
       cursor: not-allowed;
       text-decoration: line-through;
     }
-    
+
     /* Form Elements */
     .form-group {
       margin-bottom: 25px;
       text-align: left;
     }
-    
-    .form-group > label {
+
+    .form-group>label {
       display: block;
       font-size: 1.05rem;
       font-weight: bold;
@@ -237,13 +268,13 @@
       border-left: 4px solid var(--primary);
       padding-left: 10px;
     }
-    
+
     .required {
       color: var(--error);
       font-size: 0.8rem;
       margin-left: 4px;
     }
-    
+
     .form-control {
       width: 100%;
       padding: 14px 16px;
@@ -253,14 +284,14 @@
       transition: border-color 0.3s, box-shadow 0.3s;
       background: #f8fafc;
     }
-    
+
     .form-control:focus {
       outline: none;
       border-color: var(--primary);
       background: var(--white);
       box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
     }
-    
+
     /* Radio and Select Styles */
     .radio-group {
       display: flex;
@@ -268,7 +299,7 @@
       gap: 10px 14px;
       margin-top: 5px;
     }
-    
+
     .radio-label {
       display: inline-flex;
       align-items: center;
@@ -296,7 +327,7 @@
       font-weight: bold !important;
       color: var(--secondary) !important;
     }
-    
+
     .radio-label input[type="radio"] {
       appearance: none;
       background-color: #fff;
@@ -311,7 +342,7 @@
       place-content: center;
       transition: all 0.2s ease-in-out;
     }
-    
+
     .radio-label input[type="radio"]::before {
       content: "";
       width: 0.65em;
@@ -321,15 +352,15 @@
       transition: 120ms transform ease-in-out;
       box-shadow: inset 1em 1em var(--primary);
     }
-    
+
     .radio-label input[type="radio"]:checked {
       border-color: var(--primary);
     }
-    
+
     .radio-label input[type="radio"]:checked::before {
       transform: scale(1);
     }
-    
+
     .checkbox-label {
       display: inline-flex;
       align-items: center;
@@ -357,7 +388,7 @@
       font-weight: bold !important;
       color: var(--secondary) !important;
     }
-    
+
     .checkbox-label input[type="checkbox"] {
       appearance: none;
       background-color: #fff;
@@ -389,19 +420,19 @@
     .checkbox-label input[type="checkbox"]:checked::before {
       transform: scale(1);
     }
-    
+
     .helper-text {
       font-size: 0.8rem;
       color: var(--text-muted);
       margin-bottom: 8px;
       display: block;
     }
-    
+
     textarea.form-control {
       resize: vertical;
       min-height: 100px;
     }
-    
+
     .submit-btn {
       width: 100%;
       padding: 16px;
@@ -419,35 +450,42 @@
       align-items: center;
       gap: 10px;
     }
-    
+
     .submit-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 15px rgba(234, 88, 12, 0.4);
     }
-    
+
     .submit-btn:disabled {
       background: var(--gray);
       box-shadow: none;
       transform: none;
       cursor: not-allowed;
     }
-    
+
     #booking-form {
       display: none;
       animation: fadeIn 0.5s ease-out;
       border-top: 1px dashed var(--gray);
       padding-top: 25px;
     }
-    
+
     .fade-out {
       animation: fadeOut 0.3s ease-in forwards;
     }
-    
+
     @keyframes fadeOut {
-      from { opacity: 1; transform: translateY(0); }
-      to { opacity: 0; transform: translateY(-10px); }
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
     }
-    
+
     .message-box {
       padding: 20px;
       border-radius: 12px;
@@ -455,13 +493,13 @@
       margin-top: 20px;
       display: none;
     }
-    
+
     .message-box.success {
       background: #d1fae5;
       color: #065f46;
       border: 1px solid #10b981;
     }
-    
+
     .message-box.error {
       background: #fee2e2;
       color: #991b1b;
@@ -480,7 +518,8 @@
       max-height: 200px;
       overflow-y: auto;
       line-height: 1.6;
-      display: none; /* Initially hidden */
+      display: none;
+      /* Initially hidden */
     }
 
     .privacy-toggle-wrapper {
@@ -527,7 +566,8 @@
       margin-bottom: 15px;
     }
 
-    .privacy-box table th, .privacy-box table td {
+    .privacy-box table th,
+    .privacy-box table td {
       border: 1px solid #cbd5e1;
       padding: 6px 8px;
       text-align: left;
@@ -553,24 +593,28 @@
     }
   </style>
 </head>
+
 <body>
 
   <div class="container" id="main-container">
     <header>
-      <h1>あさタクシー</h1>
+      <h1>あさタクシー（LINE連携版）</h1>
       <p class="subtitle">ご希望の日時を選択してください</p>
-      <div style="margin-top: 15px; padding: 10px; background-color: #ffedd5; border-left: 4px solid var(--primary); border-radius: 4px; text-align: left; font-size: 0.85rem; color: var(--text-main);">
+      <div
+        style="margin-top: 15px; padding: 10px; background-color: #ffedd5; border-left: 4px solid var(--primary); border-radius: 4px; text-align: left; font-size: 0.85rem; color: var(--text-main);">
         <div style="padding-left: 1em; text-indent: -1em;">※当日のご予約はお電話（070-9017-6085）にて承ります。翌日以降の日程をご選択ください。</div>
-        <div style="padding-left: 1em; text-indent: -1em; margin-top: 4px;">※Webでのご予約が難しい場合は、お電話やLINEのメッセージからでも承っておりますので、お気軽にご連絡ください。</div>
+        <div style="padding-left: 1em; text-indent: -1em; margin-top: 4px;">
+          ※Webでのご予約が難しい場合は、お電話やLINEのメッセージからでも承っておりますので、お気軽にご連絡ください。</div>
       </div>
     </header>
 
-      <!-- Loading State -->
+    <!-- Loading State -->
     <div id="loader" class="loader">
       <div class="spinner"></div>
       <p style="font-weight: bold; margin-bottom: 8px;">空き状況を確認中...</p>
       <div style="font-size: 0.85rem; color: var(--text-muted); text-align: center;">
-        <div style="display: inline-block; text-align: left; padding-left: 1em; text-indent: -1em;">※確認には1〜2分程度かかる場合があります。<br>そのままお待ちください。</div>
+        <div style="display: inline-block; text-align: left; padding-left: 1em; text-indent: -1em;">
+          ※確認には1〜2分程度かかる場合があります。<br>そのままお待ちください。</div>
       </div>
     </div>
 
@@ -580,7 +624,7 @@
       <div class="dates-container" id="dates-container">
         <!-- JS will populate dates here -->
       </div>
-      
+
       <div class="step-title">2. 時間を選択</div>
       <div class="slots-grid" id="slots-container">
         <!-- JS will populate times here -->
@@ -590,7 +634,8 @@
     <!-- Booking Form -->
     <div id="booking-form">
       <div class="step-title">3. お客様情報の入力</div>
-      <p id="selected-datetime-display" style="margin-bottom: 20px; font-weight: bold; color: var(--secondary); text-align: center; background: #ffedd5; padding: 10px; border-radius: 8px;">
+      <p id="selected-datetime-display"
+        style="margin-bottom: 20px; font-weight: bold; color: var(--secondary); text-align: center; background: #ffedd5; padding: 10px; border-radius: 8px;">
         <!-- Selected Date Time -->
       </p>
 
@@ -598,12 +643,12 @@
         <label>お名前（フルネーム）<span class="required">*</span></label>
         <input type="text" id="cust-name" class="form-control" placeholder="例: 介護 太郎" required>
       </div>
-      
+
       <div class="form-group">
         <label>お迎え先（乗車地）<span class="required">*</span></label>
         <input type="text" id="cust-pickup" class="form-control" placeholder="例: ○○市△△町1-2-3" required>
       </div>
-      
+
       <div class="form-group">
         <label>目的地（降車地）<span class="required">*</span></label>
         <input type="text" id="cust-dropoff" class="form-control" placeholder="例: ○○病院" required>
@@ -631,12 +676,14 @@
           <label class="radio-label"><input type="radio" name="caller_type" value="病院の関係者様">病院の関係者様</label>
           <label class="radio-label"><input type="radio" name="caller_type" value="ケアマネージャー様">ケアマネージャー様</label>
           <label class="radio-label" style="border-radius: 12px; width: 100%; display: flex;">
-            <input type="radio" name="caller_type" value="その他" id="caller-other-radio"><span style="white-space: nowrap;">その他</span>
-            <input type="text" id="caller-other-text" class="form-control" style="padding: 8px; margin-left: 5px; border-radius: 8px;" placeholder="ご入力ください">
+            <input type="radio" name="caller_type" value="その他" id="caller-other-radio"><span
+              style="white-space: nowrap;">その他</span>
+            <input type="text" id="caller-other-text" class="form-control"
+              style="padding: 8px; margin-left: 5px; border-radius: 8px;" placeholder="ご入力ください">
           </label>
         </div>
       </div>
-      
+
       <div class="form-group">
         <label>ご連絡先（お電話番号）<span class="required">*</span></label>
         <input type="tel" id="cust-phone" class="form-control" placeholder="例: 09012345678" required>
@@ -645,7 +692,8 @@
       <div class="form-group">
         <label>往復で利用されますか？<span class="required">*</span>
           <span class="helper-text" style="color: var(--error); font-weight: bold; margin-top: 5px;">★重要！★<br>
-          <span style="color: var(--text-muted); font-weight: normal; font-size: 0.85rem;">往復をご希望の方は、この予約完了後に「お帰り（復路）」のご予約も別途お取りください。（※時間は概算でOKです）</span></span>
+            <span
+              style="color: var(--text-muted); font-weight: normal; font-size: 0.85rem;">往復をご希望の方は、この予約完了後に「お帰り（復路）」のご予約も別途お取りください。（※時間は概算でOKです）</span></span>
         </label>
         <div class="radio-group">
           <label class="radio-label"><input type="radio" name="round_trip" value="はい（往復）" required>はい（往復）</label>
@@ -674,12 +722,13 @@
           <label class="radio-label"><input type="radio" name="call_confirm" value="不要">不要</label>
         </div>
       </div>
-      
+
       <div class="form-group">
         <label>備考・特記事項
           <span class="helper-text">※特にない場合は空欄のままで構いません。</span>
         </label>
-        <textarea id="cust-notes" class="form-control" placeholder="例：身体状況により階段サポートをお願いします。付き添い1名です。&#10;その他、ご不安な点や留意事項など、なんでもご自由にお書きください。（長文でも構いません）"></textarea>
+        <textarea id="cust-notes" class="form-control"
+          placeholder="例：身体状況により階段サポートをお願いします。付き添い1名です。&#10;その他、ご不安な点や留意事項など、なんでもご自由にお書きください。（長文でも構いません）"></textarea>
       </div>
 
       <button id="submit-btn" class="submit-btn" onclick="showConfirmation()">
@@ -694,10 +743,13 @@
         以下の内容でご予約を確定してもよろしいですか？
       </p>
 
-      <div class="estimate-box" style="background: #fff3e0; border: 2px solid var(--primary-light); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
-        <h3 style="color: var(--primary); font-size: 1.1rem; margin-top: 0; margin-bottom: 10px; text-align: center;">概算お見積もり（片道・税込）</h3>
-        
-        <div style="font-size: 1.8rem; font-weight: bold; color: var(--text-main); text-align: center; margin-bottom: 15px;">
+      <div class="estimate-box"
+        style="background: #fff3e0; border: 2px solid var(--primary-light); border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+        <h3 style="color: var(--primary); font-size: 1.1rem; margin-top: 0; margin-bottom: 10px; text-align: center;">
+          概算お見積もり（片道・税込）</h3>
+
+        <div
+          style="font-size: 1.8rem; font-weight: bold; color: var(--text-main); text-align: center; margin-bottom: 15px;">
           約 <span id="est-total" style="color: #ea580c;">---</span> 円
         </div>
 
@@ -716,31 +768,48 @@
           </li>
         </ul>
 
-        <div style="margin-bottom: 15px; padding: 10px; background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 8px; font-size: 0.85rem; color: #991b1b;">
-          <div style="padding-left: 1em; text-indent: -1em;">※システムの都合上、概算見積もりが明らかに高額な場合や、計算がおかしいと思われる場合は、お手数ですがそのまま送信せずに <strong>070-9017-6085</strong> までお電話にてお申し付けください。</div>
+        <div
+          style="margin-bottom: 15px; padding: 10px; background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 8px; font-size: 0.85rem; color: #991b1b;">
+          <div style="padding-left: 1em; text-indent: -1em;">※システムの都合上、概算見積もりが明らかに高額な場合や、計算がおかしいと思われる場合は、お手数ですがそのまま送信せずに
+            <strong>070-9017-6085</strong> までお電話にてお申し付けください。
+          </div>
         </div>
         <div id="est-warnings" style="font-size: 0.85rem; color: var(--text-main); line-height: 1.5;">
           <!-- Warnings injected here -->
         </div>
       </div>
 
-      <div id="confirm-details-list" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; color: #444; line-height: 1.6;">
+      <div id="confirm-details-list"
+        style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; color: #444; line-height: 1.6;">
         <!-- Filled via JS -->
       </div>
 
       <div class="privacy-toggle-wrapper" style="margin-bottom: 15px; text-align: left;">
-        <a id="privacy-toggle" class="privacy-toggle-link" onclick="togglePrivacyText()" style="color: var(--secondary); text-decoration: underline; font-size: 0.9rem; font-weight: bold; cursor: pointer;">個人情報の取り扱いについてを確認する</a>
+        <a id="privacy-toggle" class="privacy-toggle-link" onclick="togglePrivacyText()"
+          style="color: var(--secondary); text-decoration: underline; font-size: 0.9rem; font-weight: bold; cursor: pointer;">個人情報の取り扱いについてを確認する</a>
       </div>
 
       <div id="privacy-box" class="privacy-box">
         <p>あさタクシー（以下「当事業所」）は、介護タクシーの予約・送迎サービスの提供にあたり、お客様の個人情報を以下のとおり取り扱います。</p>
         <table>
-          <tr><th>事業所名</th><td>あさタクシー</td></tr>
-          <tr><th>所在地</th><td>広島県広島市安佐南区安東5丁目7-10</td></tr>
-          <tr><th>代表者</th><td>平田隼己（ひらた としき）</td></tr>
-          <tr><th>電話番号</th><td>070-9017-6085</td></tr>
+          <tr>
+            <th>事業所名</th>
+            <td>あさタクシー</td>
+          </tr>
+          <tr>
+            <th>所在地</th>
+            <td>広島県広島市安佐南区安東5丁目7-10</td>
+          </tr>
+          <tr>
+            <th>代表者</th>
+            <td>平田隼己（ひらた としき）</td>
+          </tr>
+          <tr>
+            <th>電話番号</th>
+            <td>070-9017-6085</td>
+          </tr>
         </table>
-        
+
         <p><strong>■ 取得する情報</strong><br>お名前、ご住所、お電話番号、乗車地・降車地、ご利用希望日時、お身体の状況（車椅子利用の有無、介助の必要性等）</p>
         <p><strong>■ 利用目的</strong><br>当事業所は、取得した個人情報を以下の目的にのみ利用いたします。<br>
           ・送迎サービスの予約受付・確認・実施のため<br>
@@ -749,23 +818,31 @@
           ・予約内容に関するご連絡のため</p>
         <p><strong>■ 第三者への提供</strong><br>お客様の同意なく、上記目的以外に個人情報を利用したり、第三者に提供することはありません。ただし、法令に基づく場合はこの限りではありません。</p>
         <p><strong>■ 安全管理措置</strong><br>取得した個人情報は、不正アクセスや漏えいの防止のため、パスワード保護・2段階認証・アクセス権限の制限など適切な安全管理措置を講じて保管いたします。</p>
-        <p><strong>■ 個人情報の保管と削除</strong><br>取得した個人情報は、サービス提供に必要な期間（最終ご利用日から3年間）保管し、保管期間の経過後は速やかに安全な方法で削除いたします。お客様からの削除のご依頼があった場合は、速やかに対応いたします。</p>
-        <p><strong>■ 外部サービスの利用</strong><br>当事業所では、予約管理および運賃算出のためにGoogle社のサービス（Googleスプレッドシート、Googleカレンダー、Google Maps等）を利用しており、お客様の情報はGoogle社のサーバーに保管されます。Google社のセキュリティポリシーに基づき、通信の暗号化等の保護措置が講じられています。</p>
-        <p><strong>■ 開示・訂正・削除のご請求</strong><br>お客様ご自身の個人情報について、開示・訂正・削除・利用停止をご希望の場合は、以下の窓口までお申し出ください。ご本人確認のうえ、速やかに対応いたします。<br>
+        <p><strong>■
+            個人情報の保管と削除</strong><br>取得した個人情報は、サービス提供に必要な期間（最終ご利用日から3年間）保管し、保管期間の経過後は速やかに安全な方法で削除いたします。お客様からの削除のご依頼があった場合は、速やかに対応いたします。
+        </p>
+        <p><strong>■ 外部サービスの利用</strong><br>当事業所では、予約管理および運賃算出のためにGoogle社のサービス（Googleスプレッドシート、Googleカレンダー、Google
+          Maps等）を利用しており、お客様の情報はGoogle社のサーバーに保管されます。Google社のセキュリティポリシーに基づき、通信の暗号化等の保護措置が講じられています。</p>
+        <p><strong>■
+            開示・訂正・削除のご請求</strong><br>お客様ご自身の個人情報について、開示・訂正・削除・利用停止をご希望の場合は、以下の窓口までお申し出ください。ご本人確認のうえ、速やかに対応いたします。<br>
           お問い合わせ先：LINE公式アカウント または 電話 070-9017-6085</p>
         <p><strong>■ 本方針の変更</strong><br>法令の改正やサービス内容の変更に伴い、本方針を見直すことがあります。変更した場合は、本フォーム上に最新の内容を掲示いたします。</p>
         <p style="text-align: right; margin-top: 10px;">制定日：2026年3月16日</p>
       </div>
 
-      <div class="consent-wrapper" style="background: #fff; border: 2px solid var(--gray); border-radius: 12px; padding: 15px; margin-bottom: 25px; transition: border-color 0.3s;">
-        <label class="checkbox-label" style="border: none; background: transparent; box-shadow: none; padding: 0; width: 100%; display: flex; align-items: flex-start;">
+      <div class="consent-wrapper"
+        style="background: #fff; border: 2px solid var(--gray); border-radius: 12px; padding: 15px; margin-bottom: 25px; transition: border-color 0.3s;">
+        <label class="checkbox-label"
+          style="border: none; background: transparent; box-shadow: none; padding: 0; width: 100%; display: flex; align-items: flex-start;">
           <input type="checkbox" id="privacy-consent" onchange="toggleSubmitButton()">
-          <span style="font-weight: bold; font-size: 0.95rem; color: var(--text-main); margin-top: 2px;">上記の個人情報の取り扱いに同意して予約に進みます</span>
+          <span
+            style="font-weight: bold; font-size: 0.95rem; color: var(--text-main); margin-top: 2px;">上記の個人情報の取り扱いに同意して予約に進みます</span>
         </label>
       </div>
 
       <div style="display: flex; gap: 10px;">
-        <button class="back-btn" onclick="hideConfirmation()" style="flex: 1; padding: 15px; background: #e2e8f0; color: #475569; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer;">
+        <button class="back-btn" onclick="hideConfirmation()"
+          style="flex: 1; padding: 15px; background: #e2e8f0; color: #475569; border: none; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer;">
           修正する
         </button>
         <button id="final-submit-btn" class="submit-btn" onclick="submitBooking()" style="flex: 2;">
@@ -778,42 +855,73 @@
     <div id="result-message" class="message-box"></div>
   </div>
   <script>
+    // GASのWebアプリURL（デプロイ後に取得したURL）
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwL0ZTDlgEbl9JW78Emn1ZwynjJ_s5RbeZYxedVIauHdsXBppIhh1T6U8aZQeXodguQ/exec';
+
     // Global state
     let availabilityData = [];
     let selectedDate = null;
     let selectedTime = null;
+    let liffUserId = "初期状態"; // ユーザーID保存用変数
+
+    // LIFF Initialization
+    async function initLiff() {
+      try {
+        // 5秒のタイムアウトを設ける（ハングアップ対策）
+        const initPromise = liff.init({ liffId: "2009627931-TOdGXgvP" });
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
+        await Promise.race([initPromise, timeoutPromise]);
+
+        if (liff.isLoggedIn()) {
+          const profile = await liff.getProfile();
+          liffUserId = profile.userId;
+        } else {
+          // ブラウザ等LINE外から開かれた場合
+          liffUserId = "LINE外アクセス または 未ログイン";
+        }
+      } catch (err) {
+        console.error("LIFF Initialization failed", err);
+        liffUserId = "取得エラー: " + err.message;
+      }
+    }
+
     // Initialize: Fetch data from GAS server
     function checkAvailabilityInit() {
+      // 最初にLIFFを初期化
+      initLiff();
+
       try {
-        if (typeof google !== 'undefined' && google.script && google.script.run) {
-           google.script.run
-            .withSuccessHandler(function(jsonStr) {
-              try {
-                const data = JSON.parse(jsonStr);
-                renderDates(data);
-              } catch(e) {
-                showError("データの解析に失敗しました。");
-              }
-            })
-            .withFailureHandler(function(err) {
-              showError(err);
-            })
-            .getAvailability();
-        } else {
-          setTimeout(() => {
-            const testData = [
-              { date: '2026-03-15', displayDate: '3/15', slots: [
-                {time: '09:00', isAvailable: false}, {time: '09:15', isAvailable: false}, {time: '09:30', isAvailable: true}, {time: '09:45', isAvailable: true}, {time: '10:00', isAvailable: true}
-              ]}
-            ];
-            renderDates(testData);
-          }, 1000);
-        }
+        fetch(GAS_URL + '?action=getAvailability')
+          .then(response => {
+            if (!response.ok) throw new Error('通信エラー');
+            return response.json();
+          })
+          .then(data => {
+            // 文字列として返ってきている場合はパースする
+            if (typeof data === 'string') {
+              data = JSON.parse(data);
+            }
+            renderDates(data);
+          })
+          .catch(err => {
+            console.error("Fetch Error:", err);
+            // GASURLが設定されていないなどの場合のモックデータ
+            setTimeout(() => {
+              const testData = [
+                {
+                  date: '2026-03-15', displayDate: '3/15', slots: [
+                    { time: '09:00', isAvailable: false }, { time: '09:15', isAvailable: false }, { time: '09:30', isAvailable: true }, { time: '09:45', isAvailable: true }, { time: '10:00', isAvailable: true }
+                  ]
+                }
+              ];
+              renderDates(testData);
+            }, 1000);
+          });
       } catch (err) {
         showError(err);
       }
     };
-    
+
     // 即座に実行（window.onload の不具合を回避）
     setTimeout(checkAvailabilityInit, 100);
 
@@ -832,22 +940,22 @@
       availabilityData = data;
       document.getElementById('loader').style.display = 'none';
       document.getElementById('calendar-section').style.display = 'block';
-      
+
       const container = document.getElementById('dates-container');
       container.innerHTML = '';
-      
-      if(data.length === 0) {
+
+      if (data.length === 0) {
         container.innerHTML = '<p>現在予約可能な日程がありません。</p>';
         return;
       }
-      
+
       data.forEach((dayData, index) => {
         const dateObj = new Date(dayData.date);
         const parts = dayData.displayDate.split('/'); // ["3", "15"]
         const month = parts[0];
         const day = parts[1];
         const weekday = weekdays[dateObj.getDay()];
-        
+
         const btn = document.createElement('div');
         btn.className = 'date-btn' + (index === 0 ? ' active' : '');
         btn.innerHTML = `
@@ -855,83 +963,85 @@
           <span class="day">${day}</span>
           <span class="weekday">(${weekday})</span>
         `;
-        
+
         btn.onclick = () => selectDate(dayData.date, btn);
         container.appendChild(btn);
       });
-      
+
       // Select first day by default
       selectDate(data[0].date, container.firstChild);
     }
-    
+
     function selectDate(dateStr, btnElement) {
       selectedDate = dateStr;
       selectedTime = null;
       document.getElementById('booking-form').style.display = 'none';
-      
+
       // Update active state on buttons
       document.querySelectorAll('.date-btn').forEach(btn => btn.classList.remove('active'));
-      if(btnElement) btnElement.classList.add('active');
-      
+      if (btnElement) btnElement.classList.add('active');
+
       // Find slots for this date
       const dayData = availabilityData.find(d => d.date === dateStr);
       renderSlots(dayData ? dayData.slots : []);
     }
-    
+
     function renderSlots(slots) {
       const container = document.getElementById('slots-container');
       container.innerHTML = '';
-      
-      if(slots.length === 0) {
+
+      if (slots.length === 0) {
         container.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#64748b;">この日の枠はありません</p>';
         return;
       }
-      
+
       slots.forEach(slot => {
         const btn = document.createElement('button');
         btn.className = 'slot-btn';
         btn.textContent = slot.time;
-        
-        if(!slot.isAvailable) {
+
+        if (!slot.isAvailable) {
           btn.disabled = true;
         } else {
           btn.onclick = () => selectTime(slot.time, btn);
         }
-        
+
         container.appendChild(btn);
       });
     }
-    
+
     function selectTime(timeStr, btnElement) {
       selectedTime = timeStr;
-      
+
       // Update active state
       document.querySelectorAll('.slot-btn').forEach(btn => btn.classList.remove('active'));
       btnElement.classList.add('active');
-      
+
       // Show form
       const form = document.getElementById('booking-form');
       form.style.display = 'block';
-      
+
       // Set display text
       const dateObj = new Date(selectedDate);
-      const displayStr = `${dateObj.getMonth()+1}月${dateObj.getDate()}日(${weekdays[dateObj.getDay()]}) ${timeStr} 予約`;
+      const displayStr = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日(${weekdays[dateObj.getDay()]}) ${timeStr} 予約`;
       document.getElementById('selected-datetime-display').textContent = displayStr;
-      
+
       // Scroll to form smoothly
       setTimeout(() => {
         form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }, 100);
     }
-    
+
     // 確認画面へ進む処理
     function showConfirmation() {
+      alert("【デバッグ情報】現在のID取得状況：\n" + liffUserId);
+
       // Validate form
-      if(!selectedDate || !selectedTime) {
+      if (!selectedDate || !selectedTime) {
         alert('ご希望の日時を選択してください。');
         return;
       }
-      
+
       // カスタムバリデーション
       const reqInputs = [
         document.getElementById('cust-name'),
@@ -956,7 +1066,7 @@
       };
       const careLevel = getRadioVal('care_level');
       const roundTrip = getRadioVal('round_trip');
-      
+
       const optionElements = document.querySelectorAll('input[name="options"]:checked');
       const optionsArray = Array.from(optionElements).map(el => el.value);
       const optionsStr = optionsArray.length > 0 ? optionsArray.join('、 ') : '';
@@ -964,25 +1074,37 @@
       document.getElementById('submit-btn').textContent = '料金計算中...';
       document.getElementById('submit-btn').disabled = true;
 
-      // Call GAS function
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            document.getElementById('submit-btn').textContent = '予約の確認';
-            document.getElementById('submit-btn').disabled = false;
-            if(res.success) {
-              displayConfirmation(res);
-            } else {
-              alert('料金計算中にエラーが発生しました。\n' + res.message);
-            }
-          })
-          .withFailureHandler(function(err) {
-            document.getElementById('submit-btn').textContent = '予約の確認';
-            document.getElementById('submit-btn').disabled = false;
-            alert('通信エラーが発生しました。時間を置いて再度お試しください。');
-          })
-          .calculateEstimate(pickup, dropoff, careLevel, optionsStr, roundTrip);
-      } else {
+      // Call GAS via fetch
+      fetch(GAS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain', // GAS特有のCORS前処理を回避するため
+        },
+        body: JSON.stringify({
+          action: 'calculateEstimate',
+          pickup: pickup,
+          dropoff: dropoff,
+          careLevel: careLevel,
+          optionsStr: optionsStr,
+          roundTrip: roundTrip
+        })
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('通信エラー');
+        return response.json();
+      })
+      .then(res => {
+        document.getElementById('submit-btn').textContent = '予約の確認';
+        document.getElementById('submit-btn').disabled = false;
+        if (typeof res === 'string') res = JSON.parse(res);
+        if (res.success) {
+          displayConfirmation(res);
+        } else {
+          alert('料金計算中にエラーが発生しました。\n' + res.message);
+        }
+      })
+      .catch(err => {
+        console.error("Fetch Error:", err);
         // Fallback for local testing
         setTimeout(() => {
           document.getElementById('submit-btn').textContent = '予約の確認';
@@ -992,7 +1114,7 @@
             needsSupportWarning: true, isNoCareLevel: true, isRoundTrip: true
           });
         }, 1000);
-      }
+      });
     }
 
     function displayConfirmation(est) {
@@ -1001,7 +1123,7 @@
       confSection.style.display = 'block';
 
       document.getElementById('est-total').textContent = est.total.toLocaleString();
-      
+
       if (est.distance > 0) {
         const km = (est.distance / 1000).toFixed(1);
         document.getElementById('est-distance').textContent = `(距離目安: 約${km}km)`;
@@ -1016,32 +1138,30 @@
       document.getElementById('est-equipment').textContent = est.equipmentFee.toLocaleString() + ' 円';
 
       let warningsHtml = '';
-      
+
       // 1. 往復の案内（常時表示：片道運賃であることの明示）
       warningsHtml += `<div style="margin-bottom:8px; padding:8px; background:#fff; border-left:4px solid #ea580c; border-radius:4px;">
         <strong style="color:#ea580c;">※往復ご利用のお客様へ</strong><br>
         表示されている金額は「片道分」の概算料金です。<br>
         <span style="color:#c2410c; font-weight:bold;">往復をご希望の場合は、予約確定後に「帰り便」の予約も別途カレンダーからお願いいたします。</span>
       </div>`;
-      
+
       // 2. サポート料金の案内（常時表示）
       warningsHtml += `<div style="margin-bottom:8px; padding:8px; background:#fff; border-left:4px solid #3b82f6; border-radius:4px;">
         <strong style="color:#3b82f6;">※サポート料金について</strong><br>階段サポートやお付き添いの料金は、現場の状況や所要時間などにより当日に算出させていただきます。<span style="font-size:0.8rem; color:#666;">（目安: 階段 1,000円〜 / 付き添い 1分50円）</span>
       </div>`;
 
-      // 3. 介護度不明などの案内（条件付き）
-      if (est.isNoCareLevel) {
-        warningsHtml += `<div style="margin-bottom:8px; padding:8px; background:#fff; border-left:4px solid #10b981; border-radius:4px;">
-          <strong style="color:#10b981;">※基本介助料について</strong><br>介護度がお分かりにならない方、または初回ご利用の方につきましては、お身体の状況に合わせた最適なサポートをご提案するため、事前にお電話にて確認等させていただく場合がございます。
-        </div>`;
-      }
+      // 3. 介護度の案内（常時表示するように変更）
+      warningsHtml += `<div style="margin-bottom:8px; padding:8px; background:#fff; border-left:4px solid #10b981; border-radius:4px;">
+        <strong style="color:#10b981;">※基本介助料について</strong><br>介護度がお分かりにならない方、または初回ご利用の方につきましては、お身体の状況に合わせた最適なサポートをご提案するため、事前にお電話にて確認等させていただく場合がございます。
+      </div>`;
       document.getElementById('est-warnings').innerHTML = warningsHtml;
 
       const getRadioVal = (name) => {
         const selected = document.querySelector(`input[name="${name}"]:checked`);
         return selected ? selected.value : '';
       };
-      
+
       let callerType = getRadioVal('caller_type');
       if (callerType === 'その他') callerType = document.getElementById('caller-other-text').value || 'その他';
 
@@ -1049,21 +1169,32 @@
       const optionsArray = Array.from(optionElements).map(el => el.value);
       const optionsStr = optionsArray.length > 0 ? optionsArray.join('、 ') : 'なし';
 
+      // XSS対策（入力された特殊文字を無害化する関数）
+      const escapeHtml = (unsafe) => {
+        if (!unsafe) return '';
+        return String(unsafe)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      };
+
       const detailsHtml = `
-        <strong>日時：</strong>${document.getElementById('selected-datetime-display').textContent}<br>
-        <strong>お名前：</strong>${document.getElementById('cust-name').value}<br>
-        <strong>お迎え先：</strong>${document.getElementById('cust-pickup').value}<br>
-        <strong>目的地：</strong>${document.getElementById('cust-dropoff').value}<br>
-        <strong>予約者：</strong>${callerType}<br>
-        <strong>電話：</strong>${document.getElementById('cust-phone').value}<br>
-        <strong>往復：</strong>${getRadioVal('round_trip')}<br>
-        <strong>介護度：</strong>${getRadioVal('care_level')}<br>
-        <strong>オプション：</strong>${optionsStr}<br>
-        <strong>確認電話：</strong>${getRadioVal('call_confirm')}<br>
-        <strong>備考：</strong><br>${(document.getElementById('cust-notes').value || 'なし').replace(/\n/g, '<br>')}
+        <strong>日時：</strong>${escapeHtml(document.getElementById('selected-datetime-display').textContent)}<br>
+        <strong>お名前：</strong>${escapeHtml(document.getElementById('cust-name').value)}<br>
+        <strong>お迎え先：</strong>${escapeHtml(document.getElementById('cust-pickup').value)}<br>
+        <strong>目的地：</strong>${escapeHtml(document.getElementById('cust-dropoff').value)}<br>
+        <strong>予約者：</strong>${escapeHtml(callerType)}<br>
+        <strong>電話：</strong>${escapeHtml(document.getElementById('cust-phone').value)}<br>
+        <strong>往復：</strong>${escapeHtml(getRadioVal('round_trip'))}<br>
+        <strong>介護度：</strong>${escapeHtml(getRadioVal('care_level'))}<br>
+        <strong>オプション：</strong>${escapeHtml(optionsStr)}<br>
+        <strong>確認電話：</strong>${escapeHtml(getRadioVal('call_confirm'))}<br>
+        <strong>備考：</strong><br>${escapeHtml(document.getElementById('cust-notes').value || 'なし').replace(/\n/g, '<br>')}
       `;
       document.getElementById('confirm-details-list').innerHTML = detailsHtml;
-      
+
       // Reset consent and disable button
       document.getElementById('privacy-consent').checked = false;
       toggleSubmitButton();
@@ -1099,7 +1230,7 @@
       form.style.display = 'block';
       form.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    
+
     // 最終的なフォーム送信処理
     function submitBooking() {
       // Get selected radio values
@@ -1112,27 +1243,27 @@
       const phone = document.getElementById('cust-phone').value;
       const pickup = document.getElementById('cust-pickup').value;
       const dropoff = document.getElementById('cust-dropoff').value;
-      
+
       let callerType = getRadioVal('caller_type');
       if (callerType === 'その他') {
         const otherText = document.getElementById('caller-other-text').value;
         callerType = otherText ? `その他（${otherText}）` : 'その他';
       }
-      
+
       const roundTrip = getRadioVal('round_trip');
       const careLevel = getRadioVal('care_level');
       const callConfirm = getRadioVal('call_confirm');
       const notes = document.getElementById('cust-notes').value;
-      
+
       const optionNodes = document.querySelectorAll('input[name="options"]:checked');
       const optionsArr = Array.from(optionNodes).map(node => node.value);
       const optionsStr = optionsArr.length > 0 ? optionsArr.join('、 ') : 'なし';
 
-      if(!name || !phone || !pickup || !dropoff || !callerType || !roundTrip || !careLevel || !callConfirm) {
+      if (!name || !phone || !pickup || !dropoff || !callerType || !roundTrip || !careLevel || !callConfirm) {
         alert("必須項目（*）をすべて入力・選択してください。");
         return;
       }
-      
+
       const payload = {
         date: selectedDate,
         time: selectedTime,
@@ -1145,38 +1276,53 @@
         careLevel: careLevel,
         options: optionsStr,
         callConfirm: callConfirm,
-        notes: notes
+        notes: notes,
+        userId: liffUserId // ★ここで取得したLINEユーザーIDを送信
       };
-      
+
       // UI Update
       const btn = document.getElementById('final-submit-btn');
       btn.disabled = true;
       btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;margin:0 10px 0 0;border-width:2px;border-top-color:#fff;"></div> 送信中...';
       document.getElementById('confirmation-section').style.display = 'none';
       document.getElementById('loader').style.display = 'flex';
-      
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(handleSuccess)
-          .withFailureHandler(handleFailure)
-          .submitReservation(payload);
-      } else {
-        // Mock success
-        setTimeout(() => handleSuccess({success: true, message: '【テスト】予約が完了しました！'}), 1500);
-      }
+
+      fetch(GAS_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+        body: JSON.stringify({
+          action: 'submitReservation',
+          payload: payload
+        })
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('通信エラー');
+        return response.json();
+      })
+      .then(res => {
+        if (typeof res === 'string') res = JSON.parse(res);
+        handleSuccess(res);
+      })
+      .catch(err => {
+        console.error("Fetch Error:", err);
+        // Fallback for local testing
+        setTimeout(() => handleSuccess({ success: true, message: '【テスト】予約が完了しました！' }), 1500);
+      });
     }
-    
+
     function handleSuccess(response) {
       document.getElementById('calendar-section').style.display = 'none';
       document.getElementById('booking-form').style.display = 'none';
       document.getElementById('loader').style.display = 'none';
       const headerElement = document.querySelector('header');
-      if(headerElement) headerElement.style.display = 'none';
-      
+      if (headerElement) headerElement.style.display = 'none';
+
       const msg = document.getElementById('result-message');
       msg.style.display = 'block';
-      
-      if(response.success) {
+
+      if (response.success) {
         msg.className = 'message-box success';
         msg.innerHTML = `<h3>✅ 予約送信完了</h3>
           <p style="margin-top:10px;">ご予約を承りました！ありがとうございます。</p>
@@ -1192,7 +1338,7 @@
           <button onclick="location.reload()" style="margin-top:15px;padding:8px 16px;border-radius:8px;border:none;background:#ef4444;color:white;cursor:pointer;">カレンダーを再読み込み</button>`;
       }
     }
-    
+
     function handleFailure(error) {
       alert("通信エラーが発生しました。もう一度お試しください。");
       const btn = document.getElementById('submit-btn');
@@ -1201,4 +1347,5 @@
     }
   </script>
 </body>
+
 </html>

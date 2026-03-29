@@ -9,11 +9,50 @@ const CONFIG = {
   allowSameDay: false // 当日の予約を許可するかどうか（今回は不可）
 };
 
-// Webアプリにアクセスしたときに画面(HTML)を表示する関数
+// LINE Messaging API チャネルアクセストークン（長期）
+const LINE_CHANNEL_ACCESS_TOKEN = 'erDd3Wl/9sb6psR7elqEH+RniVBguUQrgkL4xM8NUj6ajage2dq/AiKIJugYjqtuO3zSKiWAu9wUOVWOio+735mY7dcBSGsnjlQxg0PPXI83nfa6RdJXOoC4MFfyCdGRJyhNiCMObjJjQz7jLAkWmQdB04t89/1O/w1cDnyilFU=';
+
+// GETリクエスト（空き状況取得 または HTML表示）
 function doGet(e) {
+  // パラメータに action=getAvailability があればJSONで空き状況を返す
+  if (e && e.parameter && e.parameter.action === 'getAvailability') {
+    const availabilityStr = getAvailability();
+    const output = ContentService.createTextOutput(availabilityStr);
+    output.setMimeType(ContentService.MimeType.JSON);
+    return output;
+  }
+  
+  // 今までの画面表示用（GAS単独で動かす場合用として残しておく）
   return HtmlService.createHtmlOutputFromFile('reservation_form')
       .setTitle('あさタクシー ご予約カレンダー')
-      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+// POSTリクエスト（見積もり計算 または 予約送信）
+function doPost(e) {
+  try {
+    // 送られてきたJSONデータを解析
+    const req = JSON.parse(e.postData.contents);
+    let result;
+    
+    if (req.action === 'calculateEstimate') {
+      result = calculateEstimate(req.pickup, req.dropoff, req.careLevel, req.optionsStr, req.roundTrip);
+    } else if (req.action === 'submitReservation') {
+      result = submitReservation(req.payload);
+    } else {
+      result = { success: false, message: 'Invalid action' };
+    }
+    
+    // JSONとして結果を返す
+    const output = ContentService.createTextOutput(JSON.stringify(result));
+    output.setMimeType(ContentService.MimeType.JSON);
+    return output;
+  } catch (error) {
+    const output = ContentService.createTextOutput(JSON.stringify({ success: false, message: error.message }));
+    output.setMimeType(ContentService.MimeType.JSON);
+    return output;
+  }
 }
 
 // 空き状況を取得する関数（画面側から呼び出されます）
@@ -163,12 +202,33 @@ function submitReservation(data) {
                         `往復利用：${data.roundTrip}\n` +
                         `オプション：${data.options}\n` +
                         `電話確認：${data.callConfirm}\n` +
-                        `備考：\n${data.notes || 'なし'}\n`;
+                        `備考：\n${data.notes || 'なし'}\n\n` +
+                        `[LINE_USER_ID: ${data.userId || '未取得'}]\n`;
     
-    // カレンダーへ登録
-    calendar.createEvent(eventTitle, startDate, endDate, {
-      description: description
-    });
+    // カレンダーへ登録（APIを使って強制的に日本時間帯を指定）
+    try {
+      // ① Calendar API が有効な場合の処理（絶対に日本時間になる）
+      const timeZone = 'Asia/Tokyo';
+      const eventDetails = {
+        summary: eventTitle,
+        description: description,
+        start: {
+          dateTime: Utilities.formatDate(startDate, timeZone, "yyyy-MM-dd'T'HH:mm:00'+09:00'"),
+          timeZone: timeZone
+        },
+        end: {
+          dateTime: Utilities.formatDate(endDate, timeZone, "yyyy-MM-dd'T'HH:mm:00'+09:00'"),
+          timeZone: timeZone
+        }
+      };
+      Calendar.Events.insert(eventDetails, 'primary');
+    } catch(e) {
+      // ② Calendar API が未追加の場合は従来の方法で登録（フォールバック）
+      calendar.createEvent(eventTitle, startDate, endDate, {
+        description: description
+      });
+      Logger.log("Advanced Calendar API disabled: " + e.message);
+    }
     
     // メール通知
     let subject = '【自動通知】あさタクシー 新規ご予約のお知らせ';
@@ -186,6 +246,34 @@ function submitReservation(data) {
   } catch(error) {
     Logger.log(error.message);
     return { success: false, message: 'システムエラーが発生しました。お電話にてお問い合わせください。' };
+  }
+}
+
+// カレンダーAPIの許可とタイムゾーンをテストで確認するための関数
+function testCalendarAPI() {
+  try {
+    const calendar = CalendarApp.getDefaultCalendar();
+    Logger.log("現在のカレンダーのタイムゾーン: " + calendar.getTimeZone());
+    Logger.log("現在のスクリプトのタイムゾーン: " + Session.getScriptTimeZone());
+
+    const now = new Date();
+    const end = new Date(now.getTime() + 60*60*1000);
+    const timeZone = 'Asia/Tokyo';
+    const eventDetails = {
+      summary: '【テスト】強制日本時間の確認',
+      start: {
+        dateTime: Utilities.formatDate(now, timeZone, "yyyy-MM-dd'T'HH:mm:00'+09:00'"),
+        timeZone: timeZone
+      },
+      end: {
+        dateTime: Utilities.formatDate(end, timeZone, "yyyy-MM-dd'T'HH:mm:00'+09:00'"),
+        timeZone: timeZone
+      }
+    };
+    Calendar.Events.insert(eventDetails, 'primary');
+    Logger.log("APIを使ったテスト予約が成功しました！");
+  } catch(e) {
+    Logger.log("エラー発生: " + e.message);
   }
 }
 
@@ -261,4 +349,97 @@ function calculateEstimate(pickup, dropoff, careLevel, optionsStr, roundTrip) {
   } catch(error) {
     return { success: false, message: error.message };
   }
+}
+
+// -------------------------------------------------------------
+// ▼ 自動リマインダー配信用関数（前日の予約に対してLINEを送る） ▼
+// -------------------------------------------------------------
+function sendDayBeforeReminders() {
+  const calendar = CalendarApp.getDefaultCalendar();
+  const today = new Date();
+  
+  // ターゲット：明日の予定
+  const targetDate = new Date(today);
+  targetDate.setDate(today.getDate() + 1);
+  
+  // 明日の0:00:00 〜 23:59:59 までの範囲でカレンダーを検索
+  const startOfDay = new Date(targetDate);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(targetDate);
+  endOfDay.setHours(23, 59, 59, 999);
+  
+  const events = calendar.getEvents(startOfDay, endOfDay);
+  
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
+    const description = event.getDescription() || '';
+    const title = event.getTitle();
+    
+    // イベントの説明から LINE_USER_ID を正規表現で探す
+    const match = description.match(/\[LINE_USER_ID:\s*(U[0-9a-fA-F]{31})\]/);
+    if (match && match[1]) {
+      const userId = match[1];
+      const startTimeStr = Utilities.formatDate(event.getStartTime(), Session.getScriptTimeZone(), 'HH:mm');
+      const dateDisplayStr = Utilities.formatDate(event.getStartTime(), Session.getScriptTimeZone(), 'M月d日');
+      const customerName = title.replace(' 様【予約】', '').trim();
+      
+      const messageText = 
+`【あさタクシーよりご予約の確認】
+明日のご予約日が近付きましたのでお知らせいたします🚙
+
+✅ 日時：${dateDisplayStr} ${startTimeStr}〜
+✅ お名前：${customerName} 様
+
+※お迎え先や詳細に変更がある場合、またはキャンセルの場合は、お手数ですがお早めにこのLINEのメッセージからご連絡、またはお電話にてお知らせください。
+
+明日、お気をつけてお待ちしております！`;
+      
+      sendLinePushMessage(userId, messageText);
+    }
+  }
+}
+
+// LINEのPush APIを使用してメッセージを送る関数
+function sendLinePushMessage(userId, messageText) {
+  const url = 'https://api.line.me/v2/bot/message/push';
+  const payload = {
+    to: userId,
+    messages: [{ type: 'text', text: messageText }]
+  };
+  const options = {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
+    },
+    payload: JSON.stringify(payload)
+  };
+  try {
+    UrlFetchApp.fetch(url, options);
+  } catch (e) {
+    Logger.log('LINE送信エラー: ' + e.message);
+  }
+}
+
+// -------------------------------------------------------------
+// ▼ リマインダーのタイマートリガーをセットする関数 ▼
+// （エディタ上で1回だけ「実行」ボタンを押してセットします）
+// -------------------------------------------------------------
+function setupReminderTrigger() {
+  // 古い sendDayBeforeReminders トリガーがあれば削除（重複防止）
+  const triggers = ScriptApp.getProjectTriggers();
+  for (let i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'sendDayBeforeReminders') {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+  
+  // 毎日朝8時〜9時の間に「sendDayBeforeReminders」を実行
+  ScriptApp.newTrigger('sendDayBeforeReminders')
+    .timeBased()
+    .everyDays(1)
+    .atHour(8)
+    .create();
+    
+  Logger.log('【設定完了】毎朝8時台のリマインダー自動送信トリガーを作成しました。');
 }
