@@ -598,7 +598,7 @@
 
   <div class="container" id="main-container">
     <header>
-      <h1>あさタクシー（LINE連携版）</h1>
+      <h1>あさタクシー</h1>
       <p class="subtitle">ご希望の日時を選択してください</p>
       <div
         style="margin-top: 15px; padding: 10px; background-color: #ffedd5; border-left: 4px solid var(--primary); border-radius: 4px; text-align: left; font-size: 0.85rem; color: var(--text-main);">
@@ -1034,8 +1034,6 @@
 
     // 確認画面へ進む処理
     function showConfirmation() {
-      alert("【デバッグ情報】現在のID取得状況：\n" + liffUserId);
-
       // Validate form
       if (!selectedDate || !selectedTime) {
         alert('ご希望の日時を選択してください。');
