@@ -242,6 +242,34 @@ function submitReservation(data) {
       body: description
     });
     
+    // ▼ LINEへの自動返信（サンキューメッセージ） ▼
+    // パソコンからのテスト時など、LINE IDが取得できない場合は送信しない
+    if (data.userId && data.userId.startsWith('U')) {
+      let estimateStr = "計算不可（距離算定エラー）";
+      const estimateResult = calculateEstimate(data.pickup, data.dropoff, data.careLevel, data.options, data.roundTrip);
+      if (estimateResult.success) {
+        if (estimateResult.distance > 0) {
+          estimateStr = `約 ${estimateResult.total.toLocaleString()}円`;
+        } else if (estimateResult.total > 0) {
+          estimateStr = `約 ${estimateResult.total.toLocaleString()}円 ＋ 距離運賃`;
+        } else {
+          estimateStr = `要確認`;
+        }
+      }
+
+      const lineMessage = `ご予約ありがとうございます！🚕✨\n以下の内容でご予約を承りました😊\n\n` +
+                          `■日時：${year}年${Number(month)}月${Number(day)}日 ${data.time}\n` +
+                          `■お名前：${data.name} 様\n` +
+                          `■お迎え先：${data.pickup}\n` +
+                          `■目的地：${data.dropoff}\n` +
+                          `■介護度：${data.careLevel}\n` +
+                          `■往復利用：${data.roundTrip}\n` +
+                          `■オプション：${data.options || 'なし'}\n` +
+                          `■概算お見積もり（片道・税込）：${estimateStr}\n\n` +
+                          `※詳細の確認のため、担当者よりご連絡させていただく場合がございます📞\n当日お会いできることを楽しみにしております！🙇‍♂️`;
+      sendLinePushMessage(data.userId, lineMessage);
+    }
+    
     return { success: true, message: '予約が完了しました！' };
     
   } catch(error) {
@@ -324,7 +352,7 @@ function calculateEstimate(pickup, dropoff, careLevel, optionsStr, roundTrip) {
     if (options.includes('車いす')) equipmentFee += 500;
     if (options.includes('リクライニング車いす')) equipmentFee += 2000;
     if (options.includes('ストレッチャー')) equipmentFee += 4000;
-    if (options.includes('スライディングボード')) equipmentFee += 1000;
+
 
     let totalEstimate = fare + careFee + equipmentFee;
     if (distanceMeter === 0) {
@@ -413,12 +441,29 @@ function sendLinePushMessage(userId, messageText) {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
     },
-    payload: JSON.stringify(payload)
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true // エラー発生時も例外を投げずにレスポンスを受け取る
   };
   try {
-    UrlFetchApp.fetch(url, options);
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    if (responseCode !== 200) {
+      const errorMsg = 'LINE API 応答エラー: ' + responseCode + '\\n' + response.getContentText();
+      Logger.log(errorMsg);
+      // LINEの送信に失敗した場合は、管理者にエラーメールを飛ばして原因を知らせる
+      MailApp.sendEmail({
+        to: CONFIG.adminEmail,
+        subject: '【エラー】LINE自動返信に失敗しました🚨',
+        body: `LINEへのサンキューメッセージ自動送信に失敗しました。\\n通信エラーの詳細を手掛かりに確認してください。\\n\\n【失敗したユーザーID】\\n${userId}\\n\\n【エラー詳細】\\n${response.getContentText()}`
+      });
+    }
   } catch (e) {
-    Logger.log('LINE送信エラー: ' + e.message);
+    Logger.log('LINE送信例外エラー: ' + e.message);
+    MailApp.sendEmail({
+      to: CONFIG.adminEmail,
+      subject: '【エラー】LINE通信で致命的な問題が発生しました',
+      body: `エラー内容: ${e.message}`
+    });
   }
 }
 

@@ -918,14 +918,9 @@
           const profile = await liff.getProfile();
           liffUserId = profile.userId;
         } else {
-          if (liff.isInClient()) {
-            // LINEアプリ内から開いているのに未ログイン（LIFF URLではなくGitHub等の直リンクで開かれた場合）は強制ログインする
-            liffUserId = "ログイン処理中...";
-            liff.login();
-          } else {
-            // ブラウザ等LINE外から開かれた場合
-            liffUserId = "LINE外アクセス または 未ログイン";
-          }
+          // 未ログインの場合は、LINE内外問わずログイン処理を実行する
+          liffUserId = "ログイン処理中...";
+          liff.login({ redirectUri: location.href });
         }
       } catch (err) {
         console.error("LIFF Initialization failed", err);
