@@ -911,6 +911,13 @@
     // LIFF Initialization
     async function initLiff() {
       try {
+        // LINE WORKSなど向けの専用URL判定（?skip=true）
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('skip') === 'true') {
+          liffUserId = "LINE ID未取得（承認済）";
+          return; // LIFFの初期化（LINEログイン）をスキップ
+        }
+
         // 5秒のタイムアウトを設ける（ハングアップ対策）
         const initPromise = liff.init({ liffId: "2009627931-TOdGXgvP" });
         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
