@@ -70,16 +70,18 @@ function sendNotificationAndCalendar(e) {
   // ② Googleカレンダーへの自動登録
   try {
     if (dateParsedSuccessfully) {
-      calendar.createEvent(eventTitle, eventDate, endTime, {
+      var event = calendar.createEvent(eventTitle, eventDate, endTime, {
         description: message
       });
+      event.setColor(CalendarApp.EventColor.ORANGE); // ミカン色に設定
       Logger.log('カレンダーに予定を登録しました: ' + eventTitle);
     } else {
       // 万が一フォームの日付形式が読み取れなかった場合は、今日の日付で終日イベントとして登録
       var today = new Date();
-      calendar.createAllDayEvent('【日時要確認】予約: ' + customerName + ' 様', today, {
+      var allDayEvent = calendar.createAllDayEvent('【日時要確認】予約: ' + customerName + ' 様', today, {
         description: '※ご希望日時の自動読み取りができませんでした。手動で日時を変更してください。\n\n' + message
       });
+      allDayEvent.setColor(CalendarApp.EventColor.ORANGE); // ミカン色に設定
       Logger.log('日付読み取りエラー：要確認としてカレンダーに登録しました');
     }
   } catch(error) {

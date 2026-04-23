@@ -213,6 +213,7 @@ function submitReservation(data) {
       const eventDetails = {
         summary: eventTitle,
         description: description,
+        colorId: "6", // ミカン（Tangerine）色
         start: {
           dateTime: Utilities.formatDate(startDate, timeZone, "yyyy-MM-dd'T'HH:mm:00'+09:00'"),
           timeZone: timeZone
@@ -225,9 +226,10 @@ function submitReservation(data) {
       Calendar.Events.insert(eventDetails, 'primary');
     } catch(e) {
       // ② Calendar API が未追加の場合は従来の方法で登録（フォールバック）
-      calendar.createEvent(eventTitle, startDate, endDate, {
+      const event = calendar.createEvent(eventTitle, startDate, endDate, {
         description: description
       });
+      event.setColor(CalendarApp.EventColor.ORANGE); // ミカン色
       Logger.log("Advanced Calendar API disabled: " + e.message);
     }
     
