@@ -334,6 +334,9 @@ function calculateEstimate(pickup, dropoff, careLevel, optionsStr, roundTrip) {
       const extraUnits = Math.ceil(extraDistance / 320);
       fare += extraUnits * 100;
     }
+    
+    // 時間距離併用制の概算試算用として一律300円を基本運賃に加算
+    fare += 300;
 
     // 2. 基本介助料
     let careFee = 0;
@@ -343,6 +346,8 @@ function calculateEstimate(pickup, dropoff, careLevel, optionsStr, roundTrip) {
       case '要介護3': careFee = 1500; break;
       case '要介護4': careFee = 2000; break;
       case '要介護5': careFee = 2500; break;
+      case '障害（歩行可）': careFee = 500; break;
+      case '障害（車椅子）': careFee = 1500; break;
       // 要支援1, 2, 該当なし は0円
     }
 
