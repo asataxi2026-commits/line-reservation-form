@@ -192,6 +192,19 @@ function submitReservation(data) {
     const customerName = data.name || 'お客様';
     const eventTitle = customerName + ' 様【予約】';
     
+    // ▼ 概算お見積もりの計算 ▼
+    let estimateStr = "計算不可（距離算定エラー）";
+    const estimateResult = calculateEstimate(data.pickup, data.dropoff, data.careLevel, data.options, data.roundTrip);
+    if (estimateResult.success) {
+      if (estimateResult.distance > 0) {
+        estimateStr = `約 ${estimateResult.total.toLocaleString()}円`;
+      } else if (estimateResult.total > 0) {
+        estimateStr = `約 ${estimateResult.total.toLocaleString()}円 ＋ 距離運賃`;
+      } else {
+        estimateStr = `要確認`;
+      }
+    }
+
     const description = `Googleフォーム（新アプリ）からの予約\n\n` +
                         `ご予約日時：${year}年${Number(month)}月${Number(day)}日 ${data.time}\n` +
                         `お名前：${data.name}\n` +
@@ -202,6 +215,7 @@ function submitReservation(data) {
                         `お電話番号：${data.phone}\n` +
                         `往復利用：${data.roundTrip}\n` +
                         `オプション：${data.options}\n` +
+                        `お見積り金額：${estimateStr}\n` +
                         `電話確認：${data.callConfirm}\n` +
                         `備考：\n${data.notes || 'なし'}\n\n` +
                         `[LINE_USER_ID: ${data.userId || '未取得'}]\n`;
@@ -247,18 +261,6 @@ function submitReservation(data) {
     // ▼ LINEへの自動返信（サンキューメッセージ） ▼
     // パソコンからのテスト時など、LINE IDが取得できない場合は送信しない
     if (data.userId && data.userId.startsWith('U')) {
-      let estimateStr = "計算不可（距離算定エラー）";
-      const estimateResult = calculateEstimate(data.pickup, data.dropoff, data.careLevel, data.options, data.roundTrip);
-      if (estimateResult.success) {
-        if (estimateResult.distance > 0) {
-          estimateStr = `約 ${estimateResult.total.toLocaleString()}円`;
-        } else if (estimateResult.total > 0) {
-          estimateStr = `約 ${estimateResult.total.toLocaleString()}円 ＋ 距離運賃`;
-        } else {
-          estimateStr = `要確認`;
-        }
-      }
-
       const lineMessage = `ご予約ありがとうございます！🚕✨\n以下の内容でご予約を承りました😊\n\n` +
                           `■日時：${year}年${Number(month)}月${Number(day)}日 ${data.time}\n` +
                           `■お名前：${data.name} 様\n` +

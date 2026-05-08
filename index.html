@@ -939,41 +939,38 @@
     }
 
     // Initialize: Fetch data from GAS server
-    function checkAvailabilityInit() {
-      // 最初にLIFFを初期化
-      initLiff();
+    async function checkAvailabilityInit() {
+      // 最初にLIFFの初期化を完了させる（リダイレクト等の干渉を防ぐため）
+      await initLiff();
 
-      try {
-        fetch(GAS_URL + '?action=getAvailability')
-          .then(response => {
-            if (!response.ok) throw new Error('通信エラー');
-            return response.json();
-          })
-          .then(data => {
-            // 文字列として返ってきている場合はパースする
-            if (typeof data === 'string') {
-              data = JSON.parse(data);
-            }
-            renderDates(data);
-          })
-          .catch(err => {
-            console.error("Fetch Error:", err);
-            // GASURLが設定されていないなどの場合のモックデータ
-            setTimeout(() => {
-              const testData = [
-                {
-                  date: '2026-03-15', displayDate: '3/15', slots: [
-                    { time: '09:00', isAvailable: false }, { time: '09:15', isAvailable: false }, { time: '09:30', isAvailable: true }, { time: '09:45', isAvailable: true }, { time: '10:00', isAvailable: true }
-                  ]
-                }
-              ];
-              renderDates(testData);
-            }, 1000);
-          });
-      } catch (err) {
-        showError(err);
-      }
-    };
+      // リトライ付きで空き状況を取得
+      fetchAvailabilityWithRetry(3);
+    }
+
+    function fetchAvailabilityWithRetry(retries) {
+      const cacheBuster = new Date().getTime();
+      fetch(GAS_URL + '?action=getAvailability&t=' + cacheBuster)
+        .then(response => {
+          if (!response.ok) throw new Error('通信エラー');
+          return response.json();
+        })
+        .then(data => {
+          // 文字列として返ってきている場合はパースする
+          if (typeof data === 'string') {
+            data = JSON.parse(data);
+          }
+          renderDates(data);
+        })
+        .catch(err => {
+          console.error("Fetch Error:", err);
+          if (retries > 0) {
+            console.log("再試行します。残り回数:", retries - 1);
+            setTimeout(() => fetchAvailabilityWithRetry(retries - 1), 1500);
+          } else {
+            showError(err);
+          }
+        });
+    }
 
     // 即座に実行（window.onload の不具合を回避）
     setTimeout(checkAvailabilityInit, 100);
