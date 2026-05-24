@@ -919,9 +919,9 @@
           return; // LIFFの初期化（LINEログイン）をスキップ
         }
 
-        // 5秒のタイムアウトを設ける（ハングアップ対策）
+        // 15秒のタイムアウトを設ける（遅い回線への対策。1回目は時間がかかるため）
         const initPromise = liff.init({ liffId: "2009627931-TOdGXgvP" });
-        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000));
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 15000));
         await Promise.race([initPromise, timeoutPromise]);
 
         if (liff.isLoggedIn()) {
@@ -1308,7 +1308,7 @@
     }
 
     // 最終的なフォーム送信処理
-    function submitBooking() {
+    async function submitBooking() {
       // Get selected radio values
       const getRadioVal = (name) => {
         const selected = document.querySelector(`input[name="${name}"]:checked`);
@@ -1340,6 +1340,31 @@
         return;
       }
 
+      // UI Update
+      const btn = document.getElementById('final-submit-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;margin:0 10px 0 0;border-width:2px;border-top-color:#fff;"></div> 送信中...';
+      document.getElementById('confirmation-section').style.display = 'none';
+      document.getElementById('loader').style.display = 'flex';
+
+      // ★送信前にLINE IDが取得できていなければ再取得を試みる（初回タイムアウト時の保険）
+      if (liffUserId === "初期状態" || liffUserId.startsWith("取得エラー") || liffUserId === "ログイン処理中...") {
+        try {
+          if (liff.isLoggedIn && liff.isLoggedIn()) {
+            const profile = await liff.getProfile();
+            liffUserId = profile.userId;
+          } else {
+            await liff.init({ liffId: "2009627931-TOdGXgvP" });
+            if (liff.isLoggedIn()) {
+              const profile = await liff.getProfile();
+              liffUserId = profile.userId;
+            }
+          }
+        } catch (e) {
+          console.error("Submission time profile fetch failed", e);
+        }
+      }
+
       const payload = {
         date: selectedDate,
         time: selectedTime,
@@ -1355,13 +1380,6 @@
         notes: notes,
         userId: liffUserId // ★ここで取得したLINEユーザーIDを送信
       };
-
-      // UI Update
-      const btn = document.getElementById('final-submit-btn');
-      btn.disabled = true;
-      btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;margin:0 10px 0 0;border-width:2px;border-top-color:#fff;"></div> 送信中...';
-      document.getElementById('confirmation-section').style.display = 'none';
-      document.getElementById('loader').style.display = 'flex';
 
       fetch(GAS_URL, {
         method: 'POST',
