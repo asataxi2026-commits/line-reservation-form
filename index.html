@@ -73,10 +73,32 @@
       margin-bottom: 30px;
     }
 
-    h1 {
-      font-size: 1.5rem;
-      color: var(--secondary);
-      margin-bottom: 8px;
+    .main-title {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .main-title .brand {
+      font-size: 1.8rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.05em;
+    }
+
+    .main-title .app-name {
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: var(--white);
+      background: linear-gradient(90deg, var(--primary), #fb923c);
+      padding: 6px 16px;
+      border-radius: 50px;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 10px rgba(249, 115, 22, 0.25);
     }
 
     p.subtitle {
@@ -598,13 +620,16 @@
 
   <div class="container" id="main-container">
     <header>
-      <h1>あさタクシー</h1>
+      <h1 class="main-title">
+        <span class="brand">あさタクシー</span>
+        <span class="app-name">✨ 空き状況＆予約アプリ 2.0 ✨</span>
+      </h1>
       <p class="subtitle">ご希望の日時を選択してください</p>
       <div
         style="margin-top: 15px; padding: 10px; background-color: #ffedd5; border-left: 4px solid var(--primary); border-radius: 4px; text-align: left; font-size: 0.85rem; color: var(--text-main);">
         <div style="padding-left: 1em; text-indent: -1em;">※当日のご予約はお電話（070-9017-6085）にて承ります。翌日以降の日程をご選択ください。</div>
-        <div style="padding-left: 1em; text-indent: -1em; margin-top: 4px;">
-          ※Webでのご予約が難しい場合は、お電話やLINEのメッセージからでも承っておりますので、お気軽にご連絡ください。</div>
+        <div style="padding-left: 1em; text-indent: -1em; margin-top: 8px; color: #c2410c; font-weight: bold; font-size: 0.9rem;">
+          ※日付と時間を選ぶだけでお電話からすぐに見積もり・ご予約も可能です（Web入力での予約も可能）。</div>
       </div>
     </header>
 
@@ -633,6 +658,22 @@
 
     <!-- Booking Form -->
     <div id="booking-form">
+      <!-- 電話見積もりショートカット -->
+      <div style="background: var(--bg-color); border: 1px solid var(--primary-light); border-radius: 12px; padding: 15px; margin-bottom: 25px; text-align: center; box-shadow: var(--shadow-sm);">
+        <p style="font-size: 0.95rem; color: var(--secondary); margin-bottom: 8px; font-weight: bold;">
+          💡 まずはすぐにお見積り金額を知りたい方へ
+        </p>
+        <p style="font-size: 0.85rem; color: var(--text-main); margin-bottom: 12px;">
+          このままお電話いただければ、すぐに見積もり・予約が可能です。
+        </p>
+        <div style="font-size: 0.85rem; color: #ea580c; font-weight: bold; margin-bottom: 6px;">
+          👇 ここを押すとすぐに電話がかけられます
+        </div>
+        <a href="tel:07090176085" style="display: inline-flex; align-items: center; justify-content: center; background: #fff; color: var(--primary); border: 2px solid var(--primary); text-decoration: none; padding: 12px 24px; border-radius: 50px; font-weight: bold; font-size: 1.1rem; transition: all 0.2s; width: 90%; max-width: 300px;">
+          📞 070-9017-6085
+        </a>
+      </div>
+
       <div class="step-title">3. お客様情報の入力</div>
       <p id="selected-datetime-display"
         style="margin-bottom: 20px; font-weight: bold; color: var(--secondary); text-align: center; background: #ffedd5; padding: 10px; border-radius: 8px;">
@@ -728,7 +769,6 @@
       <div class="form-group">
         <label>備考・特記事項
           <span class="helper-text">※特にない場合は空欄のままで構いません。</span>
-          <span class="helper-text" style="color: #ec4899; font-weight: bold; margin-top: 4px; display: inline-block;">※お好きな音楽やアーティストがもしあれば、教えてください🚕🎶</span>
         </label>
         <textarea id="cust-notes" class="form-control"
           placeholder="例：身体状況により階段サポートをお願いします。付き添い1名です。&#10;その他、ご不安な点や留意事項など、なんでもご自由にお書きください。（長文でも構いません）"></textarea>
