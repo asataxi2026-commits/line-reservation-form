@@ -207,8 +207,8 @@ function submitReservation(data) {
 
     let distanceStr = "算出不可";
     if (estimateResult.success && estimateResult.distance > 0) {
-      // Directions APIはメートル単位で距離を返すため、そのまま、またはkmに変換して表示
-      distanceStr = `${estimateResult.distance} m (約 ${(estimateResult.distance / 1000).toFixed(1)} km)`;
+      // Directions APIはメートル単位で距離を返すため、kmに変換して表示
+      distanceStr = `約 ${(estimateResult.distance / 1000).toFixed(1)} km`;
     }
 
     const description = `Googleフォーム（新アプリ）からの予約\n\n` +
