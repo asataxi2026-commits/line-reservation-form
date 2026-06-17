@@ -205,11 +205,18 @@ function submitReservation(data) {
       }
     }
 
+    let distanceStr = "算出不可";
+    if (estimateResult.success && estimateResult.distance > 0) {
+      // Directions APIはメートル単位で距離を返すため、そのまま、またはkmに変換して表示
+      distanceStr = `${estimateResult.distance} m (約 ${(estimateResult.distance / 1000).toFixed(1)} km)`;
+    }
+
     const description = `Googleフォーム（新アプリ）からの予約\n\n` +
                         `ご予約日時：${year}年${Number(month)}月${Number(day)}日 ${data.time}\n` +
-                        `お名前：${data.name}\n` +
+                        `お名前：${data.name} 様\n` +
                         `お迎え先：${data.pickup}\n` +
                         `目的地：${data.dropoff}\n` +
+                        `距離：${distanceStr}\n` +
                         `介護度：${data.careLevel}\n` +
                         `予約される方：${data.callerType}\n` +
                         `お電話番号：${data.phone}\n` +
@@ -266,6 +273,7 @@ function submitReservation(data) {
                           `■お名前：${data.name} 様\n` +
                           `■お迎え先：${data.pickup}\n` +
                           `■目的地：${data.dropoff}\n` +
+                          `■距離：${distanceStr}\n` +
                           `■介護度：${data.careLevel}\n` +
                           `■往復利用：${data.roundTrip}\n` +
                           `■オプション：${data.options || 'なし'}\n` +
