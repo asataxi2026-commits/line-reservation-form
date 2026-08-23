@@ -17,3 +17,6 @@ brain/
 *.log
 node_modules/
 package-lock.json
+
+# Google Apps Script 本体（トークン等を含むためGitHubに上げない）
+*.gs
