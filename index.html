@@ -629,7 +629,7 @@
         style="margin-top: 15px; padding: 10px; background-color: #ffedd5; border-left: 4px solid var(--primary); border-radius: 4px; text-align: left; font-size: 0.85rem; color: var(--text-main);">
         <div style="padding-left: 1em; text-indent: -1em;">※当日のご予約はお電話（070-9017-6085）にて承ります。翌日以降の日程をご選択ください。</div>
         <div style="padding-left: 1em; text-indent: -1em; margin-top: 8px; color: #c2410c; font-weight: bold; font-size: 0.9rem;">
-          ※日付と時間を選ぶだけでお電話からすぐに見積もり・ご予約も可能です（Web入力での予約も可能）。</div>
+          ※日付と時間をお選びいただければ、お電話でもすぐにお見積り・ご予約ができます。<br>　（このままWebで入力してご予約いただくことも可能です）</div>
       </div>
     </header>
 
@@ -639,7 +639,7 @@
       <p style="font-weight: bold; margin-bottom: 8px;">空き状況を確認中...</p>
       <div style="font-size: 0.85rem; color: var(--text-muted); text-align: center;">
         <div style="display: inline-block; text-align: left; padding-left: 1em; text-indent: -1em;">
-          ※確認には1〜2分程度かかる場合があります。<br>そのままお待ちください。</div>
+          ※10〜20秒ほどかかります。<br>そのままお待ちください。</div>
       </div>
     </div>
 
@@ -672,6 +672,9 @@
         <a href="tel:07090176085" style="display: inline-flex; align-items: center; justify-content: center; background: #fff; color: var(--primary); border: 2px solid var(--primary); text-decoration: none; padding: 12px 24px; border-radius: 50px; font-weight: bold; font-size: 1.1rem; transition: all 0.2s; width: 90%; max-width: 300px;">
           📞 070-9017-6085
         </a>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px;">
+          ※パソコンでご覧の方は、上の番号にお電話ください
+        </div>
       </div>
 
       <div class="step-title">3. お客様情報の入力</div>
@@ -1019,7 +1022,7 @@
       document.getElementById('loader').style.display = 'none';
       const msg = document.getElementById('result-message');
       const errText = err ? (err.message || String(err)) : "不明なエラー";
-      msg.innerHTML = `<strong>エラーが発生しました。</strong><br><span style="font-size: 0.85rem;">[詳細] ${errText}</span><br>時間を置いて再度お試しいただくか、お電話にてご連絡ください。`;
+      msg.innerHTML = `<strong>エラーが発生しました。</strong><br><span style="font-size: 0.85rem;">[詳細] ${errText}</span><br>時間を置いて再度お試しいただくか、お電話（070-9017-6085）にてご連絡ください。`;
       msg.className = 'message-box error';
       msg.style.display = 'block';
     }
@@ -1035,7 +1038,7 @@
       container.innerHTML = '';
 
       if (data.length === 0) {
-        container.innerHTML = '<p>現在予約可能な日程がありません。</p>';
+        container.innerHTML = '<p>現在予約可能な日程がありません。<br>お急ぎの場合はお電話（070-9017-6085）にてご相談ください。</p>';
         return;
       }
 
@@ -1474,7 +1477,7 @@
     }
 
     function handleFailure(error) {
-      alert("通信エラーが発生しました。もう一度お試しください。");
+      alert("通信エラーが発生しました。もう一度お試しいただくか、お電話（070-9017-6085）にてご連絡ください。");
       const btn = document.getElementById('submit-btn');
       btn.disabled = false;
       btn.innerHTML = '予約を確定する';
