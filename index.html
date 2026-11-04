@@ -1177,7 +1177,8 @@
           dropoff: dropoff,
           careLevel: careLevel,
           optionsStr: optionsStr,
-          roundTrip: roundTrip
+          roundTrip: roundTrip,
+          userId: typeof liffUserId !== 'undefined' ? liffUserId : ''
         })
       })
       .then(response => {
