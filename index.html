@@ -485,6 +485,74 @@
       cursor: not-allowed;
     }
 
+    /* ご予約の流れ（入力 → 見積もり・確認 → 予約確定）。「確定はまだ先」を見せて安心してもらう */
+    .flow-steps {
+      display: flex;
+      align-items: flex-start;
+      margin: 10px 0 14px;
+    }
+
+    .flow-step {
+      flex: 1;
+      text-align: center;
+    }
+
+    /* 「見積もり・確認」は文字が多いので、少し広くとって1行に収める */
+    .flow-step.next {
+      flex: 1.6;
+    }
+
+    .flow-dot {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      font-weight: bold;
+      background: #e2e8f0;
+      color: var(--text-muted);
+    }
+
+    .flow-label {
+      display: block;
+      margin-top: 5px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .flow-step.done .flow-dot {
+      background: #fed7aa;
+      color: #9a3412;
+    }
+
+    .flow-step.next .flow-dot {
+      background: var(--primary);
+      color: white;
+    }
+
+    .flow-step.next .flow-label {
+      color: var(--secondary);
+      font-weight: bold;
+    }
+
+    .flow-line {
+      flex: 0 0 18px;
+      height: 2px;
+      margin-top: 14px;
+      background: #e2e8f0;
+    }
+
+    .flow-note {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
     #booking-form {
       display: none;
       animation: fadeIn 0.5s ease-out;
@@ -777,9 +845,19 @@
           placeholder="例：身体状況により階段サポートをお願いします。付き添い1名です。&#10;その他、ご不安な点や留意事項など、なんでもご自由にお書きください。（長文でも構いません）"></textarea>
       </div>
 
+      <!-- ご予約の流れ：このボタンでは確定しないことを伝える -->
+      <div class="flow-steps" aria-label="ご予約の流れ：入力、見積もり・確認、予約確定の3ステップ">
+        <div class="flow-step done"><span class="flow-dot">✓</span><span class="flow-label">入力</span></div>
+        <div class="flow-line"></div>
+        <div class="flow-step next"><span class="flow-dot">2</span><span class="flow-label">見積もり・確認</span></div>
+        <div class="flow-line"></div>
+        <div class="flow-step"><span class="flow-dot">3</span><span class="flow-label">予約確定</span></div>
+      </div>
+
       <button id="submit-btn" class="submit-btn" onclick="showConfirmation()">
-        予約の確認
+        見積もり・確認へ進む
       </button>
+      <p class="flow-note">まだ予約は確定しません</p>
     </div>
 
     <!-- Confirmation Section -->
@@ -1206,7 +1284,7 @@
         return response.json();
       })
       .then(res => {
-        document.getElementById('submit-btn').textContent = '予約の確認';
+        document.getElementById('submit-btn').textContent = '見積もり・確認へ進む';
         document.getElementById('submit-btn').disabled = false;
         if (typeof res === 'string') res = JSON.parse(res);
         if (res.success) {
@@ -1218,9 +1296,9 @@
       .catch(err => {
         console.error("Fetch Error:", err);
         // 通信に失敗したときは、仮の金額を出さずに「もう一度」をお願いする
-        document.getElementById('submit-btn').textContent = '予約の確認';
+        document.getElementById('submit-btn').textContent = '見積もり・確認へ進む';
         document.getElementById('submit-btn').disabled = false;
-        alert('通信がうまくいかず、料金を計算できませんでした。\n電波のよい場所で、もう一度「予約の確認」を押してください。\n\nうまくいかない場合は、お電話（070-9017-6085）でご予約ください。');
+        alert('通信がうまくいかず、料金を計算できませんでした。\n電波のよい場所で、もう一度「見積もり・確認へ進む」を押してください。\n\nうまくいかない場合は、お電話（070-9017-6085）でご予約ください。');
       });
     }
 
