@@ -553,6 +553,80 @@
       color: var(--text-muted);
     }
 
+    /* お迎え先・目的地の「入力のコツ」。場所が正しく分かると見積もりが正確になる */
+    .place-tip {
+      background: #fff7ed;
+      border: 1px solid var(--primary-light);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--text-main);
+    }
+
+    .place-tip-title {
+      color: var(--secondary);
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .place-tip-examples {
+      margin: 6px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .place-tip-examples .ok {
+      color: #15803d;
+      font-weight: bold;
+    }
+
+    .place-tip-examples .ng {
+      color: #b91c1c;
+      font-weight: bold;
+    }
+
+    .place-tip-examples small {
+      color: var(--text-muted);
+    }
+
+    /* 確認画面：地図で見つかった場所／見つからなかったときの案内 */
+    .est-places {
+      background: white;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin: 12px 0;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--text-main);
+    }
+
+    .est-places.not-found {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+
+    .est-places-title {
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+
+    .est-places-label {
+      color: var(--text-muted);
+    }
+
+    .est-places-hint {
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-size: 0.82rem;
+    }
+
+    .est-places.not-found .est-places-hint {
+      color: #991b1b;
+    }
+
     #booking-form {
       display: none;
       animation: fadeIn 0.5s ease-out;
@@ -756,14 +830,26 @@
         <input type="text" id="cust-name" class="form-control" placeholder="例: 介護 太郎" required>
       </div>
 
+      <!-- 入力のコツ：区の名前を付けると場所が正しく分かり、見積もりが正確になる（例に実在の施設名は出さない） -->
+      <div class="place-tip">
+        <div class="place-tip-title">📍 場所の入力のコツ</div>
+        「区の名前」を付けて入力すると、場所が正しく分かり、見積もりの金額が正確になります。
+        <ul class="place-tip-examples">
+          <li><span class="ok">○</span> 安佐南区 ○○病院</li>
+          <li><span class="ok">○</span> 安佐北区 ○○町1-2-3</li>
+          <li><span class="ng">×</span> ○○病院だけ <small>（同じ名前の病院が、ほかの町にもあります）</small></li>
+          <li><span class="ng">×</span> 自宅 <small>（ご住所をお書きください）</small></li>
+        </ul>
+      </div>
+
       <div class="form-group">
         <label>お迎え先（乗車地）<span class="required">*</span></label>
-        <input type="text" id="cust-pickup" class="form-control" placeholder="例: ○○市△△町1-2-3" required>
+        <input type="text" id="cust-pickup" class="form-control" placeholder="例: 安佐南区 ○○病院" required>
       </div>
 
       <div class="form-group">
         <label>目的地（降車地）<span class="required">*</span></label>
-        <input type="text" id="cust-dropoff" class="form-control" placeholder="例: ○○病院" required>
+        <input type="text" id="cust-dropoff" class="form-control" placeholder="例: 中区 ○○クリニック" required>
       </div>
 
       <div class="form-group">
@@ -891,6 +977,9 @@
             <span id="est-equipment">--- 円</span>
           </li>
         </ul>
+
+        <!-- 地図で見つかった場所（または、見つからなかったときの案内）。中身は displayConfirmation で入れる -->
+        <div id="est-places" class="est-places" style="display: none;"></div>
 
         <div
           style="margin-bottom: 15px; padding: 10px; background-color: #fef2f2; border: 1px solid #fee2e2; border-radius: 8px; font-size: 0.85rem; color: #991b1b;">
@@ -1242,6 +1331,17 @@
         }
       }
 
+      // 「自宅」だけでは地図で場所が分からず、見積もりが出ないので、住所を書いてもらう
+      const vaguePlace = /^(ご)?(自宅|じたく|家|いえ|うち|自分の家)$/;
+      for (const input of [document.getElementById('cust-pickup'), document.getElementById('cust-dropoff')]) {
+        const value = input.value.trim();
+        if (vaguePlace.test(value)) {
+          alert('「' + value + '」だけでは地図で場所が分からず、見積もりを計算できません。\nお手数ですが、ご住所（例：安佐北区 ○○町1-2-3）をお書きください。');
+          input.focus();
+          return;
+        }
+      }
+
       // Collect data to calculate estimate
 
       const pickup = document.getElementById('cust-pickup').value;
@@ -1302,6 +1402,43 @@
       });
     }
 
+    // 確認画面に「地図で見つかった場所」を出す。見つからなかったときは、どうすればよいかを案内する
+    // （住所は地図サービスから届いた文字なので、HTMLとしてではなく「文字」として入れる）
+    function showEstimatePlaces(est) {
+      const box = document.getElementById('est-places');
+      box.innerHTML = '';
+      const addLine = (className, text) => {
+        const div = document.createElement('div');
+        if (className) div.className = className;
+        div.textContent = text;
+        box.appendChild(div);
+        return div;
+      };
+
+      if (est.distance > 0 && est.startAddress && est.endAddress) {
+        box.className = 'est-places';
+        addLine('est-places-title', 'この場所で計算しました');
+        [['お迎え：', est.startAddress], ['目的地：', est.endAddress]].forEach(([label, address]) => {
+          const line = addLine('', '');
+          const span = document.createElement('span');
+          span.className = 'est-places-label';
+          span.textContent = label;
+          line.appendChild(span);
+          line.appendChild(document.createTextNode(address));
+        });
+        addLine('est-places-hint', '違う場所になっている場合は、下の「修正する」から区の名前や住所を足して、入力し直してください。');
+        box.style.display = 'block';
+      } else if (!(est.distance > 0)) {
+        box.className = 'est-places not-found';
+        addLine('est-places-title', '場所が見つからず、料金を計算できませんでした');
+        addLine('est-places-hint', '下の「修正する」から、区の名前や住所（例：安佐北区 ○○町1-2-3）を足すと、計算できることがあります。このままご予約いただくこともできます（料金は当日ご案内します）。');
+        box.style.display = 'block';
+      } else {
+        // 古いGASのときなど、場所の情報が届かない場合は何も出さない
+        box.style.display = 'none';
+      }
+    }
+
     function displayConfirmation(est) {
       document.getElementById('booking-form').style.display = 'none';
       const confSection = document.getElementById('confirmation-section');
@@ -1321,6 +1458,8 @@
 
       document.getElementById('est-care').textContent = est.careFee.toLocaleString() + ' 円';
       document.getElementById('est-equipment').textContent = est.equipmentFee.toLocaleString() + ' 円';
+
+      showEstimatePlaces(est);
 
       let warningsHtml = '';
 
